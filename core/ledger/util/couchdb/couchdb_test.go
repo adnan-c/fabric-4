@@ -32,14 +32,13 @@ import (
 //Basic setup to test couch
 var connectURL = "couchdb:5984"
 var badConnectURL = "couchdb:5990"
-var database = "couch_util_testdb"
 var username = ""
 var password = ""
 
-func cleanup() {
+func cleanup(database  string) {
 	//create a new connection
 	couchInstance, _ := CreateCouchInstance(connectURL, username, password)
-	db, _ := CreateCouchDatabase(*couchInstance, database)
+	db := CouchDatabase{couchInstance: *couchInstance, dbName : database}
 	//drop the test database
 	db.DropDatabase()
 }
@@ -57,8 +56,7 @@ var assetJSON = []byte(`{"asset_name":"marble1","color":"blue","size":"35","owne
 
 func TestMain(m *testing.M) {
 	ledgertestutil.SetupCoreYAMLConfig("./../../../../peer")
-	//TODO CouchDB tests are disabled.  Re-enable once intermittent failures are resolved.
-	//viper.Set("ledger.state.stateDatabase", "CouchDB")
+	viper.Set("ledger.state.stateDatabase", "CouchDB")
 	result := m.Run()
 	viper.Set("ledger.state.stateDatabase", "goleveldb")
 	os.Exit(result)
@@ -87,8 +85,9 @@ func TestDBCreateSaveWithoutRevision(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbcreatesavewithoutrevision"
+		cleanup(database)
+		defer cleanup(database)
 
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(connectURL, username, password)
@@ -110,6 +109,7 @@ func TestDBBadConnection(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
+		database := "testdbbadconnection"
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(badConnectURL, username, password)
 		testutil.AssertNoError(t, err, fmt.Sprintf("Error when trying to create couch instance"))
@@ -134,8 +134,9 @@ func TestDBCreateDatabaseAndPersist(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbcreatedatabaseandpersist"
+		cleanup(database)
+		defer cleanup(database)
 
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(connectURL, username, password)
@@ -218,8 +219,9 @@ func TestDBBadJSON(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbbadjson"
+		cleanup(database)
+		defer cleanup(database)
 
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(connectURL, username, password)
@@ -249,8 +251,9 @@ func TestPrefixScan(t *testing.T) {
 	if !ledgerconfig.IsCouchDBEnabled() {
 		return
 	}
-	cleanup()
-	defer cleanup()
+	database := "testprefixscan"
+	cleanup(database)
+	defer cleanup(database)
 
 	//create a new instance and database object
 	couchInstance, err := CreateCouchInstance(connectURL, username, password)
@@ -303,8 +306,9 @@ func TestDBSaveAttachment(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbsaveattachment"
+		cleanup(database)
+		defer cleanup(database)
 		byteText := []byte(`This is a test document.  This is only a test`)
 
 		attachment := Attachment{}
@@ -342,8 +346,9 @@ func TestDBDeleteDocument(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbdeletedocument"
+		cleanup(database)
+		defer cleanup(database)
 
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(connectURL, username, password)
@@ -377,8 +382,9 @@ func TestDBDeleteNonExistingDocument(t *testing.T) {
 
 	if ledgerconfig.IsCouchDBEnabled() == true {
 
-		cleanup()
-		defer cleanup()
+		database := "testdbdeletenonexistingdocument"
+		cleanup(database)
+		defer cleanup(database)
 
 		//create a new instance and database object
 		couchInstance, err := CreateCouchInstance(connectURL, username, password)
